@@ -3,6 +3,8 @@ function el { Start-Process -Verb RunAs wt }
 Function ng {ngrok http 3000}
 
 # Git stuff
+Function thisBranch {git rev-parse --abbrev-ref HEAD}
+
 Function gtpl {git pull}
 Function gtps {git push}
 Function gtpsf {git push -f}
@@ -16,6 +18,8 @@ Function gtl {git log -n $args[0]}
 Function gtac {git add . && git commit}
 Function gtc {git commit}
 
+Function gtca {git add . && git commit --amend}
+
 Function gtb {git branch $args[0]}
 Function gtch {git checkout $args[0]}
 Function gtchb {git checkout -b $args[0]}
@@ -27,7 +31,7 @@ Function gtchdevsync {
 }
 
 Function gtrdev {
-  $branch= &git rev-parse --abbrev-ref HEAD 
+  $branch= thisBranch
   git checkout develop
   git pull
   git checkout $branch
@@ -50,12 +54,22 @@ Function gtsync {
   git pull
 }
 
-Function gtrs {git reset --soft}
-Function gtrh {git reset --hard}
-Function gtrho {
+Function gtreset {
   git reset --hard "@{u}"
   git clean -df
   git pull
+}
+
+
+Function squashThis {
+  if (!$args[0]) {
+    Write-Host "please provide a merge-base branch"
+  } else {
+    $branch= thisBranch
+    $base= git merge-base $branch $args[0]
+    git reset --soft $base
+    git commit
+  }
 }
 
 # npm stuff
